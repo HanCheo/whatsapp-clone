@@ -3,7 +3,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "../firebase";
 import firebase from "firebase";
 import Login from "./login";
-import Loading from "./Loading";
+import Loading from "../components/Loading";
 import { useEffect } from "react";
 
 function MyApp({ Component, pageProps }) {
@@ -13,17 +13,17 @@ function MyApp({ Component, pageProps }) {
     if (user) {
       db.collection("users").doc(user.uid).set(
         {
-          emai: user.email,
+          email: user.email,
           lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
           photoURL: user.photoURL,
         },
         {
-          marge: true,
+          merge: true,
         }
       );
     }
   }, [user]);
-  
+
   if (loading) return <Loading />;
   if (!user) return <Login />;
 
