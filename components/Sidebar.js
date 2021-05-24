@@ -18,7 +18,7 @@ function Sidebar() {
 
   const createChat = () => {
     const input = prompt(
-      "Please enter an email address for the user you wish to chat with"
+      "채팅할 상대방의 이메일을 입력해주세요."
     );
 
     if (!input) return null;

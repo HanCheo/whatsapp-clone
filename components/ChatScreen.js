@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Avatar, IconButton } from "@material-ui/core";
 import styled from "styled-components";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -15,7 +15,6 @@ import firebase from "firebase";
 import TimeAgo from "timeago-react";
 function ChatScreen({ chat, messages }) {
   const [user] = useAuthState(auth);
-  const [input, setInput] = useState("");
   const endOfMessageRef = useRef(null);
   const router = useRouter();
   const [messagesSnapshot] = useCollection(
@@ -33,6 +32,7 @@ function ChatScreen({ chat, messages }) {
   );
 
   const showMessages = () => {
+    console.log("message render");
     if (messagesSnapshot) {
       return messagesSnapshot.docs.map((message) => (
         <Message
@@ -58,30 +58,13 @@ function ChatScreen({ chat, messages }) {
     });
   };
 
-  const sendMessage = (e) => {
-    e.preventDefault();
-
-    // 마지막 으로 본 시간 update
-    db.collection("users").doc(user.uid).set(
-      {
-        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
-      },
-      { merge: true }
-    );
-
-    db.collection("chats").doc(router.query.id).collection("messages").add({
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      message: input,
-      user: user.email,
-      photoURL: user.photoURL,
-    });
-
-    setInput("");
-    scrollToBottom();
-  };
-
   const recipient = recipientSnapshot?.docs?.[0]?.data();
   const recipientEmail = getRecipientEmail(chat.users, user);
+
+  useEffect(() => {
+    console.log("scroll");
+    scrollToBottom();
+  });
 
   return (
     <Container>
@@ -95,16 +78,13 @@ function ChatScreen({ chat, messages }) {
           <h3>{recipientEmail}</h3>
           <p>
             {recipientSnapshot ? (
-              <p>
-                Last active :{" "}
-                {recipient?.lastSeen?.toDate() ? (
-                  <TimeAgo datetime={recipient?.lastSeen?.toDate()} />
-                ) : (
-                  "Unavailable"
-                )}
-              </p>
+              "Last active : " + recipient?.lastSeen?.toDate() ? (
+                <TimeAgo datetime={recipient?.lastSeen?.toDate()} />
+              ) : (
+                "Unavailable"
+              )
             ) : (
-              <p>Loading Last Active ...</p>
+              "Loading Last Active ..."
             )}
           </p>
         </HeaderInformation>
@@ -123,15 +103,42 @@ function ChatScreen({ chat, messages }) {
         <EndOfMessage ref={endOfMessageRef} />
       </MessageContainer>
 
-      <InputContainer>
-        <InsertEmoticonIcon />
-        <Input value={input} onChange={(e) => setInput(e.target.value)} />
-        <button hidden disabled={!input} type="submit" onClick={sendMessage}>
-          Send Message
-        </button>
-        <MicIcon />
-      </InputContainer>
+      <InputWrap user={user} router={router} />
     </Container>
+  );
+}
+
+function InputWrap({ user, router }) {
+  const [input, setInput] = useState("");
+  console.log("inputWrapRender")
+  const sendMessage = (e) => {
+    e.preventDefault();
+    // 마지막 접속 시간 update
+    db.collection("users").doc(user.uid).set(
+      {
+        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    db.collection("chats").doc(router.query.id).collection("messages").add({
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      message: input,
+      user: user.email,
+      photoURL: user.photoURL,
+    });
+    setInput("");
+  };
+
+  return (
+    <InputContainer>
+      <InsertEmoticonIcon />
+      <Input value={input} onChange={(e) => setInput(e.target.value)} />
+      <button hidden disabled={!input} type="submit" onClick={sendMessage}>
+        Send Message
+      </button>
+      <MicIcon />
+    </InputContainer>
   );
 }
 
@@ -170,9 +177,7 @@ const MessageContainer = styled.div`
   overflow-y: scroll;
 `;
 
-const EndOfMessage = styled.div`
-  margin-bottom: 50px;
-`;
+const EndOfMessage = styled.div``;
 
 const InputContainer = styled.form`
   display: flex;

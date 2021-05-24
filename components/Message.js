@@ -1,3 +1,4 @@
+import React from "react";
 import styled from "styled-components";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase";
@@ -24,7 +25,7 @@ export default Message;
 
 const Container = styled.div``;
 
-const MessageElement = styled.p`
+const MessageElement = styled.div`
   width: fit-content;
   padding: 15px;
   border-radius: 8px;
