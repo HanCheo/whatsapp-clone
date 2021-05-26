@@ -14,7 +14,7 @@
 ![Styled-Components](https://img.shields.io/badge/-Styled_Components-5C0D34?logo=styled-components)
 
 
-## Need env
+## Need env, firebase
 ```javascript
 //root folder .env.local
 //firebase api keys
@@ -26,3 +26,10 @@ NEXT_PUBLIC_messagingSenderId =
 NEXT_PUBLIC_appId = 
 ```
 
+## Start
+```
+
+npm install
+npm run dev
+
+```
